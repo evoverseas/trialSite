@@ -1,0 +1,19 @@
+# robots.txt for evoverseas.com (EV Overseas)
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://evoverseas.com/sitemap.xml
+
+# Block non-public paths
+Disallow: /admin/
+Disallow: /test/
+Disallow: /.git/
+Disallow: /google-apps-script.js
+
+# Allow static assets
+Allow: /images/
+Allow: /style.css
+Allow: /app.js
+Allow: /dashboard.html

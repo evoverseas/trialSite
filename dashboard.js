@@ -87,7 +87,7 @@ window.addEventListener('load', async function () {
             }
         } catch (err) {
             console.error('Error initializing Clerk:', err);
-            showError('Unable to load authentication. Please refresh and try again.');
+            showError('Clerk error: ' + (err.message || err.toString || String(err)));
         }
     } else {
         showError('Clerk authentication SDK failed to load. Please check your internet connection.');

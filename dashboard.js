@@ -55,12 +55,20 @@ window.addEventListener('load', async function () {
 
     if (window.Clerk) {
         try {
+            const IS_CUSTOM_DOMAIN = window.location.hostname.includes('evoverseas.com');
+            const key = IS_CUSTOM_DOMAIN
+                ? 'pk_live_Y2xlcmsuZXZvdmVyc2Vhcy5jb20k'
+                : 'pk_test_c3VwZXJiLWNyYW5lLTQ1LmNsZXJrLmFjY291bnRzLmRldiQ';
+
             if (typeof window.Clerk === 'function') {
-                clerk = new window.Clerk(CLERK_PUBLISHABLE_KEY);
+                clerk = new window.Clerk(key);
+                await clerk.load();
             } else {
                 clerk = window.Clerk;
+                if (typeof clerk.load === 'function' && !clerk.isReady) {
+                    await clerk.load({ publishableKey: key });
+                }
             }
-            await clerk.load();
 
             if (clerk.user) {
                 const email = clerk.user.emailAddresses[0]?.emailAddress || '';

@@ -46,6 +46,13 @@ let progressChart = null;
 window.addEventListener('load', async function () {
     showLoadingScreen();
 
+    // Wait up to 10 seconds for window.Clerk to load from CDN
+    let attempts = 0;
+    while (!window.Clerk && attempts < 50) {
+        await new Promise(resolve => setTimeout(resolve, 200));
+        attempts++;
+    }
+
     if (window.Clerk) {
         try {
             if (typeof window.Clerk === 'function') {

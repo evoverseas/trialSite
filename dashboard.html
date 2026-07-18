@@ -9,6 +9,7 @@
     <meta name="description"
         content="Track your study abroad application progress in real-time. View documents, milestones, and connect with your counselor.">
     <meta name="robots" content="noindex, nofollow">
+    <link rel="canonical" href="https://evoverseas.com/dashboard.html">
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="./images/favicon.png">
@@ -30,8 +31,14 @@
     <!-- Dashboard Stylesheet -->
     <link rel="stylesheet" href="dashboard.css">
 
-    <!-- Google Identity Services (Sign In with Google) -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <!-- Clerk JavaScript SDK -->
+    <script
+      async
+      crossorigin="anonymous"
+      data-clerk-publishable-key="pk_test_c3VwZXJiLWNyYW5lLTQ1LmNsZXJrLmFjY291bnRzLmRldiQ"
+      src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"
+      type="text/javascript"
+    ></script>
 
     <!-- Chart.js (CDN — Free) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
@@ -53,8 +60,17 @@
         #loginScreen,
         #loadingScreen,
         #dashboardScreen,
+        #counselorScreen,
         #errorScreen {
             display: none;
+        }
+
+        /* Clerk Auth Container Styling */
+        #clerkAuthContainer {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -97,39 +113,19 @@
     </nav>
 
     <!-- ═══════════════════════════════════════════════
-         LOGIN SCREEN
+         LOGIN SCREEN (Powered by Clerk)
          ═══════════════════════════════════════════════ -->
     <div id="loginScreen" class="login-screen" style="display: flex;">
         <div class="login-card">
             <img src="./images/favicon.png" alt="EV Overseas" class="login-logo">
-            <h1>Student Dashboard</h1>
+            <h1>Student & Counselor Portal</h1>
             <p class="login-subtitle">
-                Sign in with your Google account to track your application progress, documents, and milestones in
-                real-time.
+                Sign in to track your study abroad application progress, documents, and milestones in real-time.
             </p>
 
-            <div class="google-signin-wrapper">
-                <button id="customGoogleBtn" class="custom-google-btn" type="button">
-                    <svg width="20" height="20" viewBox="0 0 48 48">
-                        <path fill="#EA4335"
-                            d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z">
-                        </path>
-                        <path fill="#4285F4"
-                            d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z">
-                        </path>
-                        <path fill="#FBBC05"
-                            d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z">
-                        </path>
-                        <path fill="#34A853"
-                            d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z">
-                        </path>
-                    </svg>
-                    Sign in with Google
-                </button>
-            </div>
+            <!-- Clerk Pre-built Sign In Container -->
+            <div id="clerkAuthContainer"></div>
 
-            <!-- Fallback for One Tap blocked scenarios -->
-            <div id="googleSignInFallback" style="display: none;"></div>
 
             <div class="login-features">
                 <div class="login-feature">
@@ -171,15 +167,128 @@
     </div>
 
     <!-- ═══════════════════════════════════════════════
-         DASHBOARD SCREEN
+         COUNSELOR CONTROL CENTER SCREEN
+         ═══════════════════════════════════════════════ -->
+    <div id="counselorScreen">
+        <div class="dashboard-container">
+            <!-- Counselor Header -->
+            <div class="dashboard-header fade-in">
+                <div class="welcome-section">
+                    <h2>👑 Counselor Command Center</h2>
+                    <div class="welcome-meta">Manage, update, and track all student applications in real-time</div>
+                </div>
+                <div class="header-actions">
+                    <img id="counselorAvatar" class="user-avatar" src="" alt="Profile" style="display: none;">
+                    <button class="btn-signout" onclick="signOut()">
+                        <span>🚪</span> Sign Out
+                    </button>
+                </div>
+            </div>
+
+            <!-- Counselor Control Toolbar -->
+            <div class="counselor-toolbar fade-in" style="background: white; padding: 24px; border-radius: 16px; margin-bottom: 24px; box-shadow: var(--dash-shadow);">
+                <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: center; justify-content: space-between;">
+                    <div style="flex: 1; min-width: 280px;">
+                        <label style="font-weight: 600; font-size: 0.9rem; color: var(--dash-text-heading); display: block; margin-bottom: 8px;">Select Student to Manage:</label>
+                        <select id="counselorStudentSelect" class="counselor-select" style="width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid var(--dash-border); font-size: 1rem;">
+                            <option value="">-- Loading Student Roster... --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <button id="refreshCounselorBtn" class="btn btn--black" onclick="loadCounselorDashboard()" style="padding: 12px 20px; border-radius: 10px;">🔄 Refresh Roster</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Selected Student Editor Panel -->
+            <div id="counselorEditPanel" class="counselor-editor-panel fade-in" style="display: none; margin-bottom: 32px;">
+                <div class="dashboard-grid">
+                    <!-- Left: Step & Status Management -->
+                    <div style="background: white; padding: 24px; border-radius: 16px; box-shadow: var(--dash-shadow);">
+                        <h3 style="font-size: 1.2rem; color: var(--dash-text-heading); margin-bottom: 16px;">🎯 Application Step & Status</h3>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="font-weight: 600; display: block; margin-bottom: 8px;">Current Application Milestone (Step 1 - 6):</label>
+                            <div id="counselorStepButtons" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                                <button type="button" class="step-select-btn" data-step="1">1. Consultation 💬</button>
+                                <button type="button" class="step-select-btn" data-step="2">2. Shortlist 🎯</button>
+                                <button type="button" class="step-select-btn" data-step="3">3. Docs Prep 📋</button>
+                                <button type="button" class="step-select-btn" data-step="4">4. Offer Letter 🎓</button>
+                                <button type="button" class="step-select-btn" data-step="5">5. Visa Prep 🛂</button>
+                                <button type="button" class="step-select-btn" data-step="6">6. Arrival ✈️</button>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 20px;">
+                            <label style="font-weight: 600; display: block; margin-bottom: 8px;">Overall Status:</label>
+                            <select id="counselorOverallStatus" style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--dash-border);">
+                                <option value="Active">Active</option>
+                                <option value="Offer Received">Offer Received</option>
+                                <option value="Visa Processing">Visa Processing</option>
+                                <option value="Visa Approved">Visa Approved 🥳</option>
+                                <option value="On Hold">On Hold</option>
+                            </select>
+                        </div>
+
+                        <div style="margin-bottom: 20px;">
+                            <label style="font-weight: 600; display: block; margin-bottom: 8px;">Counselor Notes / Action Items for Student:</label>
+                            <textarea id="counselorNotesInput" rows="4" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--dash-border); font-family: inherit;" placeholder="Add private or student-facing notes..."></textarea>
+                        </div>
+
+                        <button id="saveCounselorChangesBtn" class="btn btn--primary" style="width: 100%; padding: 14px; border-radius: 10px; font-weight: 700; cursor: pointer;">
+                            💾 Save & Sync to Student Dashboard
+                        </button>
+                        <div id="counselorSaveMessage" style="margin-top: 10px; font-size: 0.9rem; text-align: center;"></div>
+                    </div>
+
+                    <!-- Right: Document Verification Checklist -->
+                    <div style="background: white; padding: 24px; border-radius: 16px; box-shadow: var(--dash-shadow);">
+                        <h3 style="font-size: 1.2rem; color: var(--dash-text-heading); margin-bottom: 16px;">📄 Document Verification Control</h3>
+                        <div id="counselorDocChecklist" class="doc-list">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Student Roster Overview Table -->
+            <div class="documents-section fade-in">
+                <div class="section-title">
+                    <span class="section-title-icon">👥</span> All Student Applications
+                </div>
+                <div style="overflow-x: auto; background: white; border-radius: 16px; padding: 16px; box-shadow: var(--dash-shadow);">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid var(--dash-border);">
+                                <th style="padding: 12px;">Student Name</th>
+                                <th style="padding: 12px;">Email</th>
+                                <th style="padding: 12px;">Target University / Course</th>
+                                <th style="padding: 12px;">Current Step</th>
+                                <th style="padding: 12px;">Status</th>
+                                <th style="padding: 12px;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="counselorStudentTableBody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         DASHBOARD SCREEN (Student View)
          ═══════════════════════════════════════════════ -->
     <div id="dashboardScreen">
         <div class="dashboard-container">
 
+
             <!-- Dashboard Header -->
             <div class="dashboard-header fade-in">
                 <div class="welcome-section">
-                    <h1 id="welcomeName">Welcome back!</h1>
+                    <h2 id="welcomeName">Welcome back!</h2>
                     <div id="welcomeMeta" class="welcome-meta"></div>
                 </div>
                 <div class="header-actions">

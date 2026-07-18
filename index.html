@@ -153,6 +153,15 @@
             font-size: clamp(2.2rem, 5vw, var(--text-5xl))
         }
 
+        .highlight {
+            background: linear-gradient(100deg, rgba(255, 107, 0, 0.2) 0%, rgba(255, 159, 28, 0.3) 100%);
+            padding: 0 10px;
+            border-radius: 6px;
+            color: var(--color-white);
+            display: inline-block;
+            white-space: nowrap;
+        }
+
         .navbar {
             position: fixed;
             top: 0;
@@ -564,13 +573,9 @@
         <div class="hero-content">
             <div class="container">
                 <div class="hero-text">
-                    <h1>Hyderabad's First Transparent Study Abroad Consultancy</h1>
-                    <p class="hero-subtitle">No black boxes. No hidden files. Just you, us, and a shared roadmap to your
-                        global career.</p>
-                    <p class="hero-description">Experience radical transparency with live tracking dashboards,
-                        data-driven university selection, and direct consultant access. We're Transparency-First — built
-                        by
-                        professionals who believe you deserve to see everything.</p>
+                    <h1>Honest study abroad advice. <span class="highlight">That's it.</span></h1>
+                    <p class="hero-subtitle">Data-driven university matching and complete application visibility, built for your career success.</p>
+                    <p class="hero-description">Many consultancies limit your choices to specific partner universities, keeping your application logins private. EV Overseas is built on transparency. We provide complete process visibility—giving you direct portal credentials to your university applications, live tracking dashboards, and unbiased recommendations aligned with your long-term career goals.</p>
                     <div class="hero-stats animate-stats">
                         <div class="stat">
                             <div class="stat-value-row"><span class="stat-number counter"
@@ -596,14 +601,12 @@
                         </div>
                     </div>
                     <div class="hero-buttons">
-                        <button class="btn btn--primary btn--lg" onclick="window.location.href='contact.html'">Get Your Free
-                            Career Roadmap</button>
-                        <button class="btn btn--black btn--lg" onclick="scrollToSection('glass-box')">See How We're
-                            Different</button>
+                        <button class="btn btn--primary btn--lg" onclick="window.location.href='contact.html'">Schedule a Free Consultation</button>
+                        <button class="btn btn--black btn--lg" onclick="scrollToSection('glass-box')">See Our Transparency Model</button>
                     </div>
                     <div class="hero-free-counselling">
                         <span class="free-badge">✅ 100% FREE</span>
-                        <span class="free-text">Career Guidance & Counselling — at home via Google Meet</span>
+                        <span class="free-text">Profile Evaluation & Counselling — Available in Himayat Nagar or via Google Meet</span>
                     </div>
                 </div>
             </div>
@@ -617,26 +620,23 @@
         <div class="container">
             <div class="section-header">
                 <h2>The Glass Box Process</h2>
-                <p>Radical transparency at every step. See everything. Own your data.</p>
+                <p>We work in the open. Our "Glass Box" model means you see everything we see, exactly when we see it. No secrets.</p>
             </div>
             <div class="glass-box-grid">
                 <div class="glass-box-card">
                     <div class="glass-box-icon">📊</div>
-                    <h3>Live Tracking Dashboards</h3>
-                    <p>Log in anytime to see your application status via our custom Looker Studio portals. You own your
-                        data — every document, every update, every milestone is visible to you in real-time.</p>
+                    <h3>100% Live Dashboards</h3>
+                    <p>Log in anytime to see your application status. You own your data — every screenshot, every submission, and every fee receipt is visible to you 24/7. No more wondering where your file is.</p>
                 </div>
                 <div class="glass-box-card">
                     <div class="glass-box-icon">💬</div>
-                    <h3>Agile Communication</h3>
-                    <p>No waiting on hold. No unanswered emails. Get direct access to your dedicated consultant via a
-                        private WhatsApp or Slack channel. Real questions, real answers, in real-time.</p>
+                    <h3>Direct WhatsApp Access</h3>
+                    <p>No calling an IVR, no waiting for days on emails. Get a direct line to your dedicated consultant. Ask a question, get an honest answer. It's that simple.</p>
                 </div>
                 <div class="glass-box-card">
                     <div class="glass-box-icon">📈</div>
-                    <h3>Career ROI First</h3>
-                    <p>We analyze universities based on your employability and future salary potential, not our
-                        commissions. Data-driven recommendations that maximize your career return on investment.</p>
+                    <h3>Unbiased Career ROI</h3>
+                    <p>We analyze universities based on your target salary, job placement rates, and real ROI, not our commission. If a school isn't right for you, we'll tell you straight up.</p>
                 </div>
             </div>
         </div>
@@ -648,8 +648,8 @@
     <section id="comparison" class="comparison-section">
         <div class="container">
             <div class="section-header">
-                <h2>Why Students choose EV Overseas</h2>
-                <p>See the difference between traditional agents and our transparent approach.</p>
+                <h2>Traditional Agents vs. EV Overseas</h2>
+                <p>The study abroad industry is broken. Here is how we are fixing it.</p>
             </div>
             <div class="comparison-table">
                 <div class="comparison-column old-way">
@@ -659,19 +659,19 @@
                     <ul class="comparison-list">
                         <li>
                             <span class="comparison-icon">✕</span>
-                            <span>They hide the process — you never see what’s happening behind closed doors.</span>
+                            <span>They hide the process — you never get portal logins or see submission details.</span>
                         </li>
                         <li>
                             <span class="comparison-icon">✕</span>
-                            <span>They push biased universities based on their commission agreements.</span>
+                            <span>They push specific universities to pocket heavy commission kickbacks.</span>
                         </li>
                         <li>
                             <span class="comparison-icon">✕</span>
-                            <span>Communication is slow, offline, and you’re always chasing for updates.</span>
+                            <span>Communication is slow, offline, and you're always chasing them for updates.</span>
                         </li>
                         <li>
                             <span class="comparison-icon">✕</span>
-                            <span>They limit you to 3–5 applications — fewer choices, less control.</span>
+                            <span>They limit you to 3–5 applications to save themselves time and effort.</span>
                         </li>
                     </ul>
                 </div>
@@ -682,19 +682,19 @@
                     <ul class="comparison-list">
                         <li>
                             <span class="comparison-icon">✓</span>
-                            <span>You see every application screenshot — complete visibility from day one.</span>
+                            <span>Full account credentials and raw screenshots of every single submission.</span>
                         </li>
                         <li>
                             <span class="comparison-icon">✓</span>
-                            <span>Data-driven university selection optimized for maximum career ROI.</span>
+                            <span>100% unbiased, data-backed matching optimized for your future salary.</span>
                         </li>
                         <li>
                             <span class="comparison-icon">✓</span>
-                            <span>Real-time updates via Cloud portals with direct WhatsApp access.</span>
+                            <span>Real-time tracking portals and instant answers via direct WhatsApp chat.</span>
                         </li>
                         <li>
                             <span class="comparison-icon">✓</span>
-                            <span>No limit on applications — apply to as many universities as you want.</span>
+                            <span>Apply to as many universities as it takes. No artificial limits, ever.</span>
                         </li>
                     </ul>
                 </div>
@@ -722,6 +722,12 @@
                 </button>
                 <button class="hub-tab-btn" data-tab="scholarships">
                     <i class="fas fa-award"></i> International Scholarships
+                </button>
+                <button class="hub-tab-btn" data-tab="timeline">
+                    <i class="fas fa-calendar-alt"></i> Intake Timeline Tracker
+                </button>
+                <button class="hub-tab-btn" data-tab="visa">
+                    <i class="fas fa-file-signature"></i> Visa Readiness Checklist
                 </button>
             </div>
 
@@ -999,6 +1005,150 @@
                     </div>
                 </div>
 
+                <!-- TAB 4: Intake Timeline Tracker -->
+                <div class="hub-tab-pane" id="pane-timeline">
+                    <div class="hub-glass-card">
+                        <div class="timeline-tracker-wrapper">
+                            <div class="timeline-tracker-controls">
+                                <h3 style="font-family:var(--font-heading); color:var(--color-primary); font-weight:700;">Intake Planner</h3>
+                                <p style="font-size: var(--text-sm); color: var(--color-gray-500); margin-bottom: 0;">Set your destination and targeted intake to map out your application journey milestones.</p>
+                                
+                                <div class="quiz-form-group">
+                                    <label for="timeline-country">Destination Country</label>
+                                    <select id="timeline-country" class="quiz-select">
+                                        <option value="USA" selected>United States (USA)</option>
+                                        <option value="UK">United Kingdom (UK)</option>
+                                        <option value="Germany">Germany</option>
+                                        <option value="Australia">Australia</option>
+                                    </select>
+                                </div>
+
+                                <div class="quiz-form-group">
+                                    <label for="timeline-intake">Target Intake Semester</label>
+                                    <select id="timeline-intake" class="quiz-select">
+                                        <option value="Fall 2026" selected>Fall 2026 (Aug/Sep start)</option>
+                                        <option value="Spring 2027">Spring 2027 (Jan/Feb start)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="timeline-tracker-results" id="timeline-results">
+                                <!-- Populated dynamically by app.js -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 5: Visa Readiness Checklist -->
+                <div class="hub-tab-pane" id="pane-visa">
+                    <div class="hub-glass-card">
+                        <div class="visa-checklist-wrapper">
+                            <div class="checklist-main-panel">
+                                <h3 style="font-family:var(--font-heading); color:var(--color-primary); font-weight:700; margin-bottom: 12px;">F-1 / Student Visa Checklist</h3>
+                                <p style="font-size: var(--text-sm); color: var(--color-gray-500); margin-bottom: 24px;">Check off the documents you have ready to calculate your overall visa submission readiness score.</p>
+                                
+                                <div class="checklist-group-title">1. Academic & Personal Documents</div>
+                                <div class="checklist-items-grid">
+                                    <div class="checklist-item-row">
+                                        <div class="checklist-checkbox-container">
+                                            <input type="checkbox" class="checklist-checkbox" id="chk-passport">
+                                        </div>
+                                        <div class="checklist-item-info">
+                                            <span class="checklist-item-name">Valid International Passport</span>
+                                            <span class="checklist-item-desc">Must be valid for at least 6 months beyond your intended stay.</span>
+                                        </div>
+                                    </div>
+                                    <div class="checklist-item-row">
+                                        <div class="checklist-checkbox-container">
+                                            <input type="checkbox" class="checklist-checkbox" id="chk-transcripts">
+                                        </div>
+                                        <div class="checklist-item-info">
+                                            <span class="checklist-item-name">Official Academic Transcripts</span>
+                                            <span class="checklist-item-desc">Consolidated marks sheets and degree certificates.</span>
+                                        </div>
+                                    </div>
+                                    <div class="checklist-item-row">
+                                        <div class="checklist-checkbox-container">
+                                            <input type="checkbox" class="checklist-checkbox" id="chk-english">
+                                        </div>
+                                        <div class="checklist-item-info">
+                                            <span class="checklist-item-name">English Test Scorecard (IELTS/PTE/TOEFL)</span>
+                                            <span class="checklist-item-desc">Proof of English proficiency required by the consulate and university.</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="checklist-group-title">2. University & Visa Documents</div>
+                                <div class="checklist-items-grid">
+                                    <div class="checklist-item-row">
+                                        <div class="checklist-checkbox-container">
+                                            <input type="checkbox" class="checklist-checkbox" id="chk-i20">
+                                        </div>
+                                        <div class="checklist-item-info">
+                                            <span class="checklist-item-name">Official I-20 or CAS / CoE Document</span>
+                                            <span class="checklist-item-desc">The official enrollment certificate issued by your host university.</span>
+                                        </div>
+                                    </div>
+                                    <div class="checklist-item-row">
+                                        <div class="checklist-checkbox-container">
+                                            <input type="checkbox" class="checklist-checkbox" id="chk-sevis">
+                                        </div>
+                                        <div class="checklist-item-info">
+                                            <span class="checklist-item-name">SEVIS Fee Receipt</span>
+                                            <span class="checklist-item-desc">Confirmation of SEVIS payment (applicable for USA F-1).</span>
+                                        </div>
+                                    </div>
+                                    <div class="checklist-item-row">
+                                        <div class="checklist-checkbox-container">
+                                            <input type="checkbox" class="checklist-checkbox" id="chk-ds160">
+                                        </div>
+                                        <div class="checklist-item-info">
+                                            <span class="checklist-item-name">DS-160 Confirmation Page</span>
+                                            <span class="checklist-item-desc">Completed visa application form barcode confirmation page.</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="checklist-group-title">3. Financial Documents</div>
+                                <div class="checklist-items-grid">
+                                    <div class="checklist-item-row">
+                                        <div class="checklist-checkbox-container">
+                                            <input type="checkbox" class="checklist-checkbox" id="chk-loan">
+                                        </div>
+                                        <div class="checklist-item-info">
+                                            <span class="checklist-item-name">Education Loan Sanction Letter or Bank Statement</span>
+                                            <span class="checklist-item-desc">Evidence of sufficient liquid funds to cover tuition and living costs.</span>
+                                        </div>
+                                    </div>
+                                    <div class="checklist-item-row">
+                                        <div class="checklist-checkbox-container">
+                                            <input type="checkbox" class="checklist-checkbox" id="chk-solvency">
+                                        </div>
+                                        <div class="checklist-item-info">
+                                            <span class="checklist-item-name">Affidavit of Support & IT Returns</span>
+                                            <span class="checklist-item-desc">Sponsor documentation confirming source of funds and support declaration.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="checklist-readiness-panel">
+                                <h3>Your Visa Readiness</h3>
+                                <div class="readiness-radial-wrapper">
+                                    <svg class="readiness-radial-svg">
+                                        <circle class="readiness-radial-bg" cx="70" cy="70" r="64"></circle>
+                                        <circle class="readiness-radial-bar" id="readiness-radial-bar" cx="70" cy="70" r="64"></circle>
+                                    </svg>
+                                    <div class="readiness-radial-text" id="readiness-percent-text">0%</div>
+                                </div>
+                                <span class="readiness-status-badge" id="readiness-badge">📝 Setup Stage</span>
+                                <p style="font-size: var(--text-xs); color: #CBD5E1; margin-top: 15px; margin-bottom: 0; line-height: 1.5;">Completing your documents is the hardest part. Our experts review every single document for 100% consulate compliance.</p>
+                                <a href="contact.html" class="btn btn--primary readiness-btn" style="background:var(--color-white); color:var(--color-primary);">Get Free Document Audit</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </section>
@@ -1007,46 +1157,39 @@
     <section id="services" class="services">
         <div class="container">
             <div class="section-header">
-                <h2>Study Abroad Services in Hyderabad</h2>
-                <p>Comprehensive Study Abroad Solutions</p>
+                <h2>Our Services (With Zero Fluff)</h2>
+                <p>Everything you need to study abroad, handled honestly and transparently.</p>
             </div>
             <div class="services-grid">
                 <div class="service-card">
                     <div class="service-icon">📚</div>
-                    <h3>Test Preparation Coaching</h3>
-                    <p>IELTS, TOEFL, GRE, GMAT coaching and preparation guidance with experienced trainers and proven
-                        track record.</p>
+                    <h3>Honest Test Prep</h3>
+                    <p>Learn what it takes to clear IELTS, TOEFL, GRE, or GMAT. We focus on real practice, small batches, and no false score guarantees. Just solid prep.</p>
                 </div>
                 <div class="service-card">
                     <div class="service-icon">🎓</div>
-                    <h3>University Selection & Application</h3>
-                    <p>Expert guidance to choose the right university based on your profile, budget, and career goals
-                        with complete application support.</p>
+                    <h3>Unbiased University Selection</h3>
+                    <p>We evaluate your profile against actual historical data to find where you'll thrive. No steering you to commission-heavy schools.</p>
                 </div>
                 <div class="service-card">
                     <div class="service-icon">🏦</div>
-                    <h3>Education Loan Process</h3>
-                    <p>End-to-end loan assistance with transparent eligibility checks. We partner with trusted banks and
-                        NBFCs — no hidden commissions, no pushy selling. Support for both secured and unsecured
-                        education loans, tailored to your needs.</p>
+                    <h3>No-Nonsense Education Loans</h3>
+                    <p>We help you compare loans from multiple banks. We don't take under-the-table kickbacks, so you get the lowest interest rate possible.</p>
                 </div>
                 <div class="service-card">
                     <div class="service-icon">💰</div>
-                    <h3>Scholarship Assistance</h3>
-                    <p>Help you find and apply for scholarships to reduce education costs with personalized funding
-                        strategies.</p>
+                    <h3>Scholarships You Can Get</h3>
+                    <p>We search governmental, trust-based, and university funds to find scholarships that fit your profile. No fake lottery entries or empty promises.</p>
                 </div>
                 <div class="service-card">
                     <div class="service-icon">🛂</div>
-                    <h3>Student Visa Processing</h3>
-                    <p>End-to-end visa assistance with 97% success rate and expert consultation for all major study
-                        destinations.</p>
+                    <h3>Expert Visa Filing (97% Success)</h3>
+                    <p>We've processed hundreds of visas. We know the pitfalls, the trick questions, and the documents needed. We do it right the first time.</p>
                 </div>
                 <div class="service-card">
                     <div class="service-icon">🏠</div>
-                    <h3>Accommodation Support</h3>
-                    <p>Assistance with finding suitable accommodation and pre-departure guidance for smooth transition
-                        abroad.</p>
+                    <h3>Pre-departure & Housing Advice</h3>
+                    <p>We don't leave you at the airport. We help you find safe, verified student housing and connect with seniors already on campus.</p>
                 </div>
             </div>
         </div>
@@ -1359,33 +1502,26 @@
     <section id="about" class="about-it">
         <div class="container">
             <div class="section-header">
-                <h2>Why We're Different</h2>
-                <p>Built on a simple belief: students deserve complete honesty.</p>
+                <h2>Why we built EV Overseas</h2>
+                <p>Study abroad consulting is notorious for being shady. We're here to change that.</p>
             </div>
             <div class="about-it-content">
                 <div class="about-it-text">
-                    <p>We started EV Overseas because we were frustrated with how the study abroad industry works. Too
-                        many
-                        agents hide behind closed doors, push students toward universities that pay the highest
-                        commissions, and make promises they can't keep.</p>
-                    <p>That's not us. We believe in <strong>radical transparency</strong> — showing you exactly what's
-                        happening with your application, giving you honest assessments even when it's uncomfortable, and
-                        putting your career goals above our profits.</p>
-                    <p>Every student who works with us gets personalized guidance, not a one-size-fits-all approach. We
-                        don't mass-process applications. We don't overpromise. We simply work with you, one step at a
-                        time, to find the path that's genuinely right for <em>you</em>.</p>
+                    <p>Traditional agents work in the shadows. They hide application portals, rewrite SOPs without your consent, and push you into low-tier schools just to collect high commission kickbacks. It feels like a high-pressure sales pitch rather than actual career guidance.</p>
+                    <p>We think that's wrong. We believe you deserve <strong>radical honesty</strong>. With us, you get full access to your application credentials, direct updates, and objective, data-backed guidance that prioritizes your future salary over our bottom line.</p>
+                    <p>We don't overpromise visa guarantees, and we don't hide communications. We simply work with you, step by step, to build a path that makes real sense for you. No secrets, no surprise fees. That's our promise.</p>
                     <div class="about-it-pillars">
                         <div class="about-pillar">
                             <div class="about-pillar-icon">🎯</div>
-                            <h4>Student-First</h4>
+                            <h4>100% Unbiased</h4>
                         </div>
                         <div class="about-pillar">
                             <div class="about-pillar-icon">🔍</div>
-                            <h4>Transparency</h4>
+                            <h4>Radical Honesty</h4>
                         </div>
                         <div class="about-pillar">
                             <div class="about-pillar-icon">🤝</div>
-                            <h4>Ethical Guidance</h4>
+                            <h4>True Partnership</h4>
                         </div>
                     </div>
                 </div>
@@ -1438,6 +1574,38 @@
                     <p style="text-align:center;margin-top:12px;font-size:0.9rem;color:var(--color-gray-600);">
                         📍 302A Aaltos A&M Trade Center, Himayat Nagar, Hyderabad - 500029
                     </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+         VERIFIED COMPANY FACT SHEET (AEO / LLM Citations Signal)
+         ============================================ -->
+    <section id="aeo-fact-sheet" class="fact-sheet-section" style="background:var(--color-gray-50); padding:40px 0; border-top:1px solid var(--color-border); border-bottom:1px solid var(--color-border);">
+        <div class="container">
+            <div class="section-header" style="text-align:center; margin-bottom:30px;">
+                <h2 style="font-size:24px; color:var(--color-primary); margin-bottom:8px;">Verified Company Fact Sheet</h2>
+                <p>Consistent, factual data points audit-ready for students and AI search engines.</p>
+            </div>
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:20px; max-width:1000px; margin:0 auto; padding:0 20px;">
+                <div style="background:#fff; padding:20px; border-radius:12px; border:1px solid var(--color-border); box-shadow:var(--shadow-sm);">
+                    <h3 style="font-size:16px; margin-bottom:12px; color:var(--color-accent); display:flex; align-items:center; gap:8px;"><i class="fas fa-info-circle"></i> Business Credentials</h3>
+                    <table style="width:100%; border-collapse:collapse; font-size:14px;">
+                        <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:8px 0; font-weight:700; color:var(--color-primary);">Official Name</td><td id="aeo-business-name" style="padding:8px 0; text-align:right;">EV Overseas</td></tr>
+                        <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:8px 0; font-weight:700; color:var(--color-primary);">Himayat Nagar HQ</td><td id="aeo-business-address" style="padding:8px 0; text-align:right; font-size:12px; line-height:1.4;">302A Aaltos A&M Trade Center, Himayat Nagar, Hyderabad, 500029, TS, India</td></tr>
+                        <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:8px 0; font-weight:700; color:var(--color-primary);">Consultation Fee</td><td id="aeo-pricing" style="padding:8px 0; text-align:right; color:var(--color-success); font-weight:700;">₹0 (Free Career Counselling)</td></tr>
+                        <tr><td style="padding:8px 0; font-weight:700; color:var(--color-primary);">Official Contact</td><td id="aeo-telephone" style="padding:8px 0; text-align:right;">+91-9666963756 / info@evoverseas.com</td></tr>
+                    </table>
+                </div>
+                <div style="background:#fff; padding:20px; border-radius:12px; border:1px solid var(--color-border); box-shadow:var(--shadow-sm);">
+                    <h3 style="font-size:16px; margin-bottom:12px; color:var(--color-accent); display:flex; align-items:center; gap:8px;"><i class="fas fa-chart-line"></i> Success Metrics & Destinations</h3>
+                    <table style="width:100%; border-collapse:collapse; font-size:14px;">
+                        <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:8px 0; font-weight:700; color:var(--color-primary);">Visa Success Rate</td><td id="aeo-visa-rate" style="padding:8px 0; text-align:right; font-weight:700; color:var(--color-success);">97% Consulate Success</td></tr>
+                        <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:8px 0; font-weight:700; color:var(--color-primary);">Destinations</td><td id="aeo-destinations" style="padding:8px 0; text-align:right;">USA, UK, Germany, Australia</td></tr>
+                        <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:8px 0; font-weight:700; color:var(--color-primary);">Core Services</td><td id="aeo-services" style="padding:8px 0; text-align:right; font-size:12px;">Admissions, SOP guidance, Visas, Loans, Blocked Accounts</td></tr>
+                        <tr><td style="padding:8px 0; font-weight:700; color:var(--color-primary);">Partnerships</td><td id="aeo-accreditations" style="padding:8px 0; text-align:right; font-size:12px;">500+ global universities direct & partner routes</td></tr>
+                    </table>
                 </div>
             </div>
         </div>

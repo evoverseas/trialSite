@@ -1,22 +1,22 @@
 /**
  * ============================================================
- * EV OVERSEAS — Student Dashboard JavaScript (Multi-App)
+ * EV OVERSEAS — Student & Counselor Dashboard (Clerk Auth + Google Sheets)
  * ============================================================
- * 
- * Handles:
- * - Google Sign-In authentication
- * - Fetching student data with multiple applications
- * - Application selector dropdown
- * - Rendering dashboard UI for selected application
- * - Chart.js progress visualization
  */
 
 // ── CONFIGURATION ──────────────────────────────────────────
-// ⚠️ REPLACE THESE WITH YOUR ACTUAL VALUES:
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzI6mgA3ELgi4YW-nbbpXEUhxJsBUc6gyj7IZn6rodIClK7AybjkVfTQMyDxfF1B8c-/exec';
-const GOOGLE_CLIENT_ID = '1004728784932-0380a7n79s0rs5d41dbgnmreoogp0fmm.apps.googleusercontent.com';
+const CLERK_PUBLISHABLE_KEY = 'pk_test_c3VwZXJiLWNyYW5lLTQ1LmNsZXJrLmFjY291bnRzLmRldiQ';
 
-// ── Journey Steps Definition (matches website) ────────────
+// Official Counselor Email Addresses
+const COUNSELOR_EMAILS = [
+    'gopi.chand@evoverseas.com',
+    'lakshmi.bala@evoverseas.com',
+    'alisha.mulani@evoverseas.com',
+    'mohibmulani@gmail.com'
+];
+
+// ── Journey Steps Definition ──────────────────────────────
 const JOURNEY_STEPS = [
     { number: 1, name: 'Initial Consultation', icon: '💬' },
     { number: 2, name: 'Profile & University Shortlist', icon: '🎯' },
@@ -27,106 +27,384 @@ const JOURNEY_STEPS = [
 ];
 
 // ── GLOBAL STATE ───────────────────────────────────────────
+let clerk = null;
 let currentUser = null;
+let userRole = 'student'; // 'student' or 'counselor'
 let studentData = null;
+let allStudentsData = [];
+let selectedStudentObj = null;
+let selectedAppIndex = 0;
 let currentApplicationIndex = 0;
 let progressChart = null;
 
 // ── INITIALIZATION ─────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', function () {
-    // Show login screen initially
-    showLoginScreen();
+window.addEventListener('load', async function () {
+    showLoadingScreen();
 
-    // Initialize custom Google Sign-In button
-    const googleBtn = document.getElementById('customGoogleBtn');
-    if (googleBtn) {
-        googleBtn.addEventListener('click', handleGoogleSignIn);
+    if (window.Clerk) {
+        clerk = window.Clerk;
+        try {
+            await clerk.load();
+
+            if (clerk.user) {
+                const email = clerk.user.emailAddresses[0]?.emailAddress || '';
+                const role = clerk.user.publicMetadata?.role || 'student';
+
+                currentUser = {
+                    id: clerk.user.id,
+                    email: email,
+                    name: clerk.user.fullName || clerk.user.firstName || email.split('@')[0],
+                    picture: clerk.user.imageUrl,
+                    role: role
+                };
+
+                // Detect Counselor: check role or official counselor emails list
+                const isCounselor = role === 'counselor' ||
+                    COUNSELOR_EMAILS.map(e => e.toLowerCase()).includes(email.toLowerCase()) ||
+                    email.toLowerCase().includes('counselor') ||
+                    email.toLowerCase().includes('admin');
+
+                if (isCounselor) {
+                    userRole = 'counselor';
+                    await loadCounselorDashboard();
+                } else {
+                    userRole = 'student';
+                    await loadStudentDashboard();
+                }
+            } else {
+                showLoginScreen();
+                mountClerkAuth();
+            }
+        } catch (err) {
+            console.error('Error initializing Clerk:', err);
+            showError('Unable to load authentication. Please refresh and try again.');
+        }
+    } else {
+        showError('Clerk authentication SDK failed to load. Please check your internet connection.');
     }
 });
 
-// ── Google Identity Services Callback ──────────────────────
-function handleCredentialResponse(response) {
-    // Decode the JWT token from Google
-    const payload = parseJwt(response.credential);
+// ── MOUNT CLERK AUTH UI ────────────────────────────────────
+function mountClerkAuth() {
+    const container = document.getElementById('clerkAuthContainer');
+    if (!container || !clerk) return;
 
-    if (payload) {
-        currentUser = {
-            email: payload.email,
-            name: payload.name,
-            picture: payload.picture,
-            given_name: payload.given_name
-        };
-        loadDashboard();
-    } else {
-        showError('Failed to process your sign-in. Please try again.');
-    }
-}
-
-// Google Sign-In handler for custom button
-function handleGoogleSignIn() {
-    // Check if GIS is loaded
-    if (typeof google === 'undefined' || !google.accounts) {
-        showError('Google Sign-In is loading. Please wait a moment and try again.');
-        return;
-    }
-
-    google.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
-        callback: handleCredentialResponse,
-        auto_select: false,
-        cancel_on_tap_outside: true
-    });
-
-    google.accounts.id.prompt((notification) => {
-        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-            // Fallback — show the One Tap prompt in popup mode
-            google.accounts.id.renderButton(
-                document.getElementById('googleSignInFallback'),
-                {
-                    type: 'standard',
-                    theme: 'outline',
-                    size: 'large',
-                    shape: 'pill',
-                    width: 300,
-                    text: 'signin_with',
-                    logo_alignment: 'left'
-                }
-            );
-            document.getElementById('googleSignInFallback').style.display = 'flex';
-            document.getElementById('googleSignInFallback').style.justifyContent = 'center';
-            document.getElementById('googleSignInFallback').style.marginTop = '12px';
+    container.innerHTML = '';
+    clerk.mountSignIn(container, {
+        appearance: {
+            variables: {
+                colorPrimary: '#00B4D8',
+                colorText: '#0A2342',
+                borderRadius: '12px'
+            }
         }
     });
 }
 
-// ── Parse JWT Token ────────────────────────────────────────
-function parseJwt(token) {
-    try {
-        const base64Url = token.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const jsonPayload = decodeURIComponent(
-            atob(base64).split('').map(function (c) {
-                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-            }).join('')
-        );
-        return JSON.parse(jsonPayload);
-    } catch (e) {
-        console.error('Error parsing JWT:', e);
-        return null;
+// ── SIGN OUT HANDLER ───────────────────────────────────────
+function signOut() {
+    if (clerk) {
+        clerk.signOut().then(() => {
+            window.location.reload();
+        });
+    } else {
+        window.location.reload();
     }
 }
 
-// ── Load Dashboard Data ────────────────────────────────────
-async function loadDashboard() {
+// ── SCREEN SWITCHERS ───────────────────────────────────────
+function showLoginScreen() {
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('errorScreen').style.display = 'none';
+    document.getElementById('dashboardScreen').style.display = 'none';
+    document.getElementById('counselorScreen').style.display = 'none';
+}
+
+function showLoadingScreen() {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('loadingScreen').style.display = 'flex';
+    document.getElementById('errorScreen').style.display = 'none';
+    document.getElementById('dashboardScreen').style.display = 'none';
+    document.getElementById('counselorScreen').style.display = 'none';
+}
+
+function showError(msg) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('dashboardScreen').style.display = 'none';
+    document.getElementById('counselorScreen').style.display = 'none';
+    document.getElementById('errorScreen').style.display = 'flex';
+
+    if (msg) {
+        document.getElementById('errorMessage').textContent = msg;
+    }
+}
+
+function showNotRegistered(message) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('dashboardScreen').style.display = 'none';
+    document.getElementById('counselorScreen').style.display = 'none';
+    document.getElementById('errorScreen').style.display = 'flex';
+    document.getElementById('errorIcon').textContent = '🔒';
+    document.getElementById('errorTitle').textContent = 'Account Not Registered';
+    document.getElementById('errorMessage').textContent = message ||
+        'Your email is not registered with EV Overseas. Please contact us to get started on your study abroad journey.';
+    document.getElementById('retryBtn').textContent = 'Contact EV Overseas';
+    document.getElementById('retryBtn').onclick = function () {
+        window.location.href = 'index.html#contact';
+    };
+}
+
+// ═══════════════════════════════════════════════════════════
+// COUNSELOR DASHBOARD LOGIC
+// ═══════════════════════════════════════════════════════════
+
+async function loadCounselorDashboard() {
+    showLoadingScreen();
+
+    try {
+        const url = `${APPS_SCRIPT_URL}?action=getAllStudents`;
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.success && data.students) {
+            allStudentsData = data.students;
+            renderCounselorDashboard();
+        } else {
+            showError(data.message || 'Failed to fetch student roster for counselor.');
+        }
+    } catch (err) {
+        console.error('Error loading counselor data:', err);
+        showError('Unable to load counselor dashboard data.');
+    }
+}
+
+function renderCounselorDashboard() {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('errorScreen').style.display = 'none';
+    document.getElementById('dashboardScreen').style.display = 'none';
+    document.getElementById('counselorScreen').style.display = 'block';
+
+    // Set Counselor Avatar
+    const avatar = document.getElementById('counselorAvatar');
+    if (currentUser.picture) {
+        avatar.src = currentUser.picture;
+        avatar.style.display = 'block';
+    }
+
+    // Populate Student Select Dropdown
+    const select = document.getElementById('counselorStudentSelect');
+    select.innerHTML = '<option value="">-- Choose a Student to Edit --</option>' +
+        allStudentsData.map((s, idx) => `
+            <option value="${idx}">
+                ${s.name} (${s.email}) — ${s.applications ? s.applications.length : 0} Application(s)
+            </option>
+        `).join('');
+
+    select.onchange = function (e) {
+        const val = e.target.value;
+        if (val !== '') {
+            selectStudentForCounselor(parseInt(val));
+        } else {
+            document.getElementById('counselorEditPanel').style.display = 'none';
+        }
+    };
+
+    // Render Student Table
+    renderCounselorTable();
+}
+
+function renderCounselorTable() {
+    const tbody = document.getElementById('counselorStudentTableBody');
+    if (!tbody) return;
+
+    if (allStudentsData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="padding: 16px; text-align: center;">No students found in Google Sheet database.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = allStudentsData.map((student, idx) => {
+        const primaryApp = (student.applications && student.applications.length > 0) ? student.applications[0] : {};
+        const stepNum = primaryApp.currentStep || 1;
+        const status = primaryApp.overallStatus || 'Active';
+
+        return `
+            <tr style="border-bottom: 1px solid var(--dash-border-light);">
+                <td style="padding: 12px; font-weight: 600;">${student.name || 'Student'}</td>
+                <td style="padding: 12px; color: var(--dash-text-muted);">${student.email}</td>
+                <td style="padding: 12px;">${primaryApp.university || 'N/A'} <br><span style="font-size: 0.8rem; color: var(--dash-text-muted);">${primaryApp.course || ''}</span></td>
+                <td style="padding: 12px;"><span class="badge badge-submitted">Step ${stepNum} of 6</span></td>
+                <td style="padding: 12px;"><span class="badge badge-${getStatusBadgeClass(status)}">${status}</span></td>
+                <td style="padding: 12px;">
+                    <button class="btn btn--black btn--sm" onclick="selectStudentForCounselor(${idx})" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
+                        ✏️ Manage
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function selectStudentForCounselor(studentIdx) {
+    selectedStudentObj = allStudentsData[studentIdx];
+    if (!selectedStudentObj || !selectedStudentObj.applications || selectedStudentObj.applications.length === 0) {
+        alert('This student has no applications registered in the Google Sheet.');
+        return;
+    }
+
+    // Set dropdown selection
+    document.getElementById('counselorStudentSelect').value = studentIdx;
+
+    const editPanel = document.getElementById('counselorEditPanel');
+    editPanel.style.display = 'block';
+
+    const app = selectedStudentObj.applications[0];
+    const currentStep = app.currentStep || 1;
+
+    // Highlight Step Buttons
+    const stepBtns = document.querySelectorAll('.step-select-btn');
+    stepBtns.forEach(btn => {
+        const step = parseInt(btn.getAttribute('data-step'));
+        if (step === currentStep) {
+            btn.style.background = '#00B4D8';
+            btn.style.color = '#FFF';
+            btn.style.borderColor = '#00B4D8';
+        } else if (step < currentStep) {
+            btn.style.background = '#10B981';
+            btn.style.color = '#FFF';
+            btn.style.borderColor = '#10B981';
+        } else {
+            btn.style.background = '#F1F5F9';
+            btn.style.color = '#475569';
+            btn.style.borderColor = '#E2E8F0';
+        }
+
+        btn.onclick = function () {
+            app.currentStep = step;
+            selectStudentForCounselor(studentIdx);
+        };
+    });
+
+    // Populate overall status dropdown
+    document.getElementById('counselorOverallStatus').value = app.overallStatus || 'Active';
+
+    // Populate notes
+    document.getElementById('counselorNotesInput').value = app.notes || selectedStudentObj.notes || '';
+
+    // Populate document checklist
+    renderCounselorDocChecklist(app);
+
+    // Save button event
+    const saveBtn = document.getElementById('saveCounselorChangesBtn');
+    saveBtn.onclick = function () {
+        saveCounselorChanges(app);
+    };
+
+    // Scroll smoothly to edit panel
+    editPanel.scrollIntoView({ behavior: 'smooth' });
+}
+
+function renderCounselorDocChecklist(app) {
+    const container = document.getElementById('counselorDocChecklist');
+    if (!container) return;
+
+    const defaultDocs = [
+        'Passport Copy',
+        'Statement of Purpose (SOP)',
+        'Letters of Recommendation (LOR)',
+        'Academic Transcripts',
+        'IELTS / English Test Score',
+        'Bank Statement / Financial Docs',
+        'Offer Letter',
+        'Visa Application Docs'
+    ];
+
+    const existingDocs = app.documents || [];
+
+    const docItems = defaultDocs.map(docName => {
+        const found = existingDocs.find(d => d.name.toLowerCase().includes(docName.toLowerCase()) || docName.toLowerCase().includes(d.name.toLowerCase()));
+        const status = found ? found.status : 'Pending';
+
+        return `
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid var(--dash-border-light);">
+                <span style="font-weight: 500;">${getDocIcon(docName)} ${docName}</span>
+                <select class="doc-status-select" data-docname="${docName}" style="padding: 6px 10px; border-radius: 6px; border: 1px solid var(--dash-border);">
+                    <option value="Pending" ${status === 'Pending' ? 'selected' : ''}>Pending ⏳</option>
+                    <option value="Uploaded" ${status === 'Uploaded' ? 'selected' : ''}>Uploaded 📤</option>
+                    <option value="Verified" ${status === 'Verified' ? 'selected' : ''}>Verified ✅</option>
+                </select>
+            </div>
+        `;
+    });
+
+    container.innerHTML = docItems.join('');
+}
+
+async function saveCounselorChanges(app) {
+    const msgDiv = document.getElementById('counselorSaveMessage');
+    const saveBtn = document.getElementById('saveCounselorChangesBtn');
+
+    saveBtn.disabled = true;
+    msgDiv.textContent = '⏳ Saving updates to Google Sheets...';
+    msgDiv.style.color = '#00B4D8';
+
+    // Gather doc statuses
+    const docSelects = document.querySelectorAll('.doc-status-select');
+    const updatedDocs = Array.from(docSelects).map(sel => ({
+        name: sel.getAttribute('data-docname'),
+        status: sel.value
+    }));
+
+    const payload = {
+        applicationId: app.applicationId,
+        currentStep: parseInt(app.currentStep),
+        overallStatus: document.getElementById('counselorOverallStatus').value,
+        notes: document.getElementById('counselorNotesInput').value,
+        documents: updatedDocs
+    };
+
+    try {
+        const response = await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+
+        const resData = await response.json();
+
+        if (resData.success) {
+            msgDiv.textContent = '✅ Updated successfully! Student dashboard will reflect these changes.';
+            msgDiv.style.color = '#10B981';
+            setTimeout(() => {
+                loadCounselorDashboard();
+            }, 1500);
+        } else {
+            msgDiv.textContent = '⚠️ ' + (resData.message || 'Failed to save updates.');
+            msgDiv.style.color = '#EF4444';
+        }
+    } catch (err) {
+        console.error('Error saving updates:', err);
+        msgDiv.textContent = '❌ Connection error while saving updates.';
+        msgDiv.style.color = '#EF4444';
+    } finally {
+        saveBtn.disabled = false;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════
+// STUDENT DASHBOARD LOGIC (Read-Only)
+// ═══════════════════════════════════════════════════════════
+
+async function loadStudentDashboard() {
     showLoadingScreen();
 
     try {
         const url = `${APPS_SCRIPT_URL}?email=${encodeURIComponent(currentUser.email)}`;
         const response = await fetch(url);
 
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
+        if (!response.ok) throw new Error('Network response error');
 
         const data = await response.json();
 
@@ -136,118 +414,44 @@ async function loadDashboard() {
         }
 
         if (!data.success) {
-            showNotRegistered(data.message || 'Unable to load your dashboard data.');
+            showNotRegistered(data.message || 'Unable to load dashboard data.');
             return;
         }
 
         studentData = data;
         currentApplicationIndex = 0;
-        renderDashboard();
-
-    } catch (error) {
-        console.error('Error loading dashboard:', error);
-        showError('Unable to connect to the server. Please check your internet connection and try again.');
+        renderStudentDashboard();
+    } catch (err) {
+        console.error('Error loading student dashboard:', err);
+        showError('Unable to connect to EV Overseas server. Please try again.');
     }
 }
 
-// ── SCREEN RENDERING ───────────────────────────────────────
-
-function showLoginScreen() {
-    document.getElementById('loginScreen').style.display = 'flex';
-    document.getElementById('loadingScreen').style.display = 'none';
-    document.getElementById('dashboardScreen').style.display = 'none';
-    document.getElementById('errorScreen').style.display = 'none';
-}
-
-function showLoadingScreen() {
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('loadingScreen').style.display = 'flex';
-    document.getElementById('dashboardScreen').style.display = 'none';
-    document.getElementById('errorScreen').style.display = 'none';
-}
-
-function showDashboardScreen() {
+function renderStudentDashboard() {
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('errorScreen').style.display = 'none';
+    document.getElementById('counselorScreen').style.display = 'none';
     document.getElementById('dashboardScreen').style.display = 'block';
-    document.getElementById('errorScreen').style.display = 'none';
-}
 
-function showError(message) {
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('loadingScreen').style.display = 'none';
-    document.getElementById('dashboardScreen').style.display = 'none';
-    document.getElementById('errorScreen').style.display = 'flex';
-    document.getElementById('errorMessage').textContent = message;
-}
-
-function showNotRegistered(message) {
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('loadingScreen').style.display = 'none';
-    document.getElementById('dashboardScreen').style.display = 'none';
-    document.getElementById('errorScreen').style.display = 'flex';
-    document.getElementById('errorIcon').textContent = '🔒';
-    document.getElementById('errorTitle').textContent = 'Account Not Found';
-    document.getElementById('errorMessage').textContent = message ||
-        'Your email is not registered with EV Overseas. Please contact us to get started on your study abroad journey.';
-    document.getElementById('retryBtn').textContent = 'Contact EV Overseas';
-    document.getElementById('retryBtn').onclick = function () {
-        window.location.href = 'index.html#contact';
-    };
-}
-
-// ── SIGN OUT ───────────────────────────────────────────────
-function signOut() {
-    currentUser = null;
-    studentData = null;
-    currentApplicationIndex = 0;
-
-    if (typeof google !== 'undefined' && google.accounts) {
-        google.accounts.id.disableAutoSelect();
-    }
-
-    // Destroy chart
-    if (progressChart) {
-        progressChart.destroy();
-        progressChart = null;
-    }
-
-    showLoginScreen();
-}
-
-// ── RENDER DASHBOARD ───────────────────────────────────────
-function renderDashboard() {
     const student = studentData.student;
     const applications = studentData.applications;
 
-    // ── Welcome Header
-    document.getElementById('welcomeName').textContent = `Welcome back, ${student.name || currentUser.given_name || 'Student'}!`;
+    document.getElementById('welcomeName').textContent = `Welcome back, ${student.name || currentUser.name}!`;
 
-    // User avatar
     const avatar = document.getElementById('userAvatar');
     if (currentUser.picture) {
         avatar.src = currentUser.picture;
         avatar.style.display = 'block';
     }
 
-    // ── Render Application Selector
     renderApplicationSelector(applications);
-
-    // ── Render the currently selected application
     displayApplication(currentApplicationIndex);
-
-    // ── Counselor Card (same for all applications)
     renderCounselor(student);
-
-    // Show dashboard
-    showDashboardScreen();
 }
 
-// ── Application Selector ───────────────────────────────────
 function renderApplicationSelector(applications) {
     const header = document.querySelector('.dashboard-header');
-
-    // Check if selector already exists
     let selectorDiv = document.getElementById('applicationSelector');
 
     if (!selectorDiv) {
@@ -258,7 +462,6 @@ function renderApplicationSelector(applications) {
     }
 
     if (applications.length === 1) {
-        // Only one application - show as badge, no selector
         selectorDiv.innerHTML = `
             <div class="single-app-badge">
                 <span class="app-badge-icon">🎓</span>
@@ -269,7 +472,6 @@ function renderApplicationSelector(applications) {
             </div>
         `;
     } else {
-        // Multiple applications - show selector
         selectorDiv.innerHTML = `
             <label for="appSelector" class="app-selector-label">
                 <span>📚</span> Select Application:
@@ -284,7 +486,6 @@ function renderApplicationSelector(applications) {
             <div class="app-selector-count">${applications.length} Applications</div>
         `;
 
-        // Add event listener
         const selector = document.getElementById('appSelector');
         if (selector) {
             selector.addEventListener('change', (e) => {
@@ -295,12 +496,9 @@ function renderApplicationSelector(applications) {
     }
 }
 
-// ── Display Selected Application ──────────────────────────
 function displayApplication(index) {
     const app = studentData.applications[index];
-    const student = studentData.student;
 
-    // Update welcome meta badges
     const metaHtml = [];
     if (app.university) metaHtml.push(`<span class="meta-badge">🎓 ${app.university}</span>`);
     if (app.country) metaHtml.push(`<span class="meta-badge">🌍 ${app.country}</span>`);
@@ -311,26 +509,16 @@ function displayApplication(index) {
     const totalSteps = 6;
     const progress = Math.round((currentStep / totalSteps) * 100);
 
-    // ── Status Overview Cards
     renderStatusCards(app, currentStep, progress);
-
-    // ── Progress Tracker
     renderProgressTracker(currentStep, app.milestones, progress);
-
-    // ── Progress Chart
     renderProgressChart(currentStep, totalSteps);
-
-    // ── Documents
     renderDocuments(app.documents);
-
-    // ── Timeline
     renderTimeline(app.milestones, currentStep);
 }
 
-// ── Status Cards ───────────────────────────────────────────
 function renderStatusCards(app, currentStep, progress) {
     const completedDocs = app.documents ? app.documents.filter(d =>
-        d.status && (d.status.toLowerCase() === 'approved' || d.status.toLowerCase() === 'submitted')
+        d.status && (d.status.toLowerCase() === 'approved' || d.status.toLowerCase() === 'verified' || d.status.toLowerCase() === 'submitted')
     ).length : 0;
 
     const totalDocs = app.documents ? app.documents.length : 0;
@@ -349,7 +537,7 @@ function renderStatusCards(app, currentStep, progress) {
         </div>
         <div class="status-card fade-in stagger-3" style="--card-accent: var(--dash-warning);">
             <div class="status-card-icon">📄</div>
-            <div class="status-card-label">Documents</div>
+            <div class="status-card-label">Documents Verified</div>
             <div class="status-card-value">${completedDocs} / ${totalDocs}</div>
         </div>
         <div class="status-card fade-in stagger-4" style="--card-accent: ${getStatusColor(app.overallStatus)};">
@@ -362,9 +550,7 @@ function renderStatusCards(app, currentStep, progress) {
     `;
 }
 
-// ── Progress Tracker ───────────────────────────────────────
 function renderProgressTracker(currentStep, milestones, progress) {
-    // Progress bar
     const fill = document.getElementById('progressFill');
     const percent = document.getElementById('progressPercent');
     setTimeout(() => {
@@ -372,14 +558,12 @@ function renderProgressTracker(currentStep, milestones, progress) {
     }, 300);
     percent.textContent = `${progress}% Complete`;
 
-    // Steps
     const stepsContainer = document.getElementById('stepsGrid');
     stepsContainer.innerHTML = JOURNEY_STEPS.map(step => {
         let status = 'pending';
         if (step.number < currentStep) status = 'completed';
         else if (step.number === currentStep) status = 'active';
 
-        // Find milestone date
         const milestone = milestones ? milestones.find(m => parseInt(m.stepNumber) === step.number) : null;
         const dateStr = milestone && milestone.date ? formatDate(milestone.date) : '';
 
@@ -395,12 +579,10 @@ function renderProgressTracker(currentStep, milestones, progress) {
     }).join('');
 }
 
-// ── Progress Chart ─────────────────────────────────────────
 function renderProgressChart(currentStep, totalSteps) {
     const ctx = document.getElementById('progressChartCanvas');
     if (!ctx) return;
 
-    // Destroy existing chart
     if (progressChart) {
         progressChart.destroy();
     }
@@ -415,56 +597,21 @@ function renderProgressChart(currentStep, totalSteps) {
             labels: ['Completed', 'In Progress', 'Remaining'],
             datasets: [{
                 data: [completed, inProgress, remaining],
-                backgroundColor: [
-                    '#22C55E',
-                    '#00B4D8',
-                    '#1E293B'
-                ],
-                borderColor: [
-                    'rgba(34, 197, 94, 0.3)',
-                    'rgba(0, 180, 216, 0.3)',
-                    'rgba(30, 41, 59, 0.5)'
-                ],
+                backgroundColor: ['#22C55E', '#00B4D8', '#1E293B'],
                 borderWidth: 2,
-                hoverOffset: 6,
-                borderRadius: 4,
-                spacing: 2
+                cutout: '72%'
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: true,
-            cutout: '72%',
             plugins: {
-                legend: {
-                    display: true,
-                    position: 'bottom',
-                    labels: {
-                        color: '#94A3B8',
-                        padding: 16,
-                        font: {
-                            family: "'Open Sans', sans-serif",
-                            size: 11
-                        },
-                        usePointStyle: true,
-                        pointStyle: 'circle'
-                    }
-                },
-                tooltip: {
-                    backgroundColor: '#111D33',
-                    titleColor: '#E2E8F0',
-                    bodyColor: '#94A3B8',
-                    borderColor: 'rgba(0, 180, 216, 0.2)',
-                    borderWidth: 1,
-                    cornerRadius: 8,
-                    padding: 12
-                }
+                legend: { display: true, position: 'bottom' }
             }
         }
     });
 }
 
-// ── Documents ──────────────────────────────────────────────
 function renderDocuments(documents) {
     const container = document.getElementById('documentsList');
 
@@ -497,11 +644,9 @@ function renderDocuments(documents) {
     }).join('');
 }
 
-// ── Timeline ───────────────────────────────────────────────
 function renderTimeline(milestones, currentStep) {
     const container = document.getElementById('timelineContainer');
 
-    // If no milestones, generate from journey steps
     const items = (milestones && milestones.length > 0) ? milestones : JOURNEY_STEPS.map(s => ({
         stepNumber: s.number,
         stepName: s.name,
@@ -530,7 +675,6 @@ function renderTimeline(milestones, currentStep) {
     }).join('');
 }
 
-// ── Counselor Card ─────────────────────────────────────────
 function renderCounselor(student) {
     const container = document.getElementById('counselorContainer');
 
@@ -539,9 +683,7 @@ function renderCounselor(student) {
     const phone = (student.counselorPhone || '+919666963756').toString();
     const initials = name.split(' ').map(n => n.charAt(0)).join('').substring(0, 2).toUpperCase();
 
-    // Format phone for display (remove + and spaces for cleaner look)
     const phoneDisplay = phone.replace(/[\s-]/g, '');
-    // Format phone for WhatsApp (ensure it starts with country code, no + or spaces)
     const whatsappPhone = phoneDisplay.replace(/^\+/, '');
 
     container.innerHTML = `
@@ -572,17 +714,16 @@ function renderCounselor(student) {
     `;
 }
 
-// ── UTILITY FUNCTIONS ──────────────────────────────────────
+// ── UTILITY HELPERS ────────────────────────────────────────
 
 function formatDate(dateStr) {
     if (!dateStr) return '';
     try {
         let date;
-
-        // Check if it's in dd-mm-yyyy format (e.g., "15-01-2026")
-        if (typeof dateStr === 'string' && /^\d{2}-\d{2}-\d{4}$/.test(dateStr)) {
+        if (typeof dateStr === 'string' && /^\d{2}-\d{4}$/.test(dateStr)) {
+            return dateStr;
+        } else if (typeof dateStr === 'string' && /^\d{2}-\d{2}-\d{4}$/.test(dateStr)) {
             const [day, month, year] = dateStr.split('-');
-            // Create date as yyyy-mm-dd for proper parsing
             date = new Date(`${year}-${month}-${day}`);
         } else {
             date = new Date(dateStr);
@@ -638,6 +779,7 @@ function getDocStatusClass(status) {
     switch (status.toLowerCase()) {
         case 'submitted': return 'submitted';
         case 'approved': return 'approved';
+        case 'verified': return 'approved';
         case 'pending': return 'pending';
         case 'under review': return 'review';
         default: return 'pending';

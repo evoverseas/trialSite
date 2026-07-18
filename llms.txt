@@ -1,0 +1,26 @@
+# EV Overseas
+
+> Unbiased, transparent study abroad consulting based in Hyderabad, India.
+
+EV Overseas is an overseas education consultancy providing honest, data-driven career roadmap and student visa processing services with zero hidden agency fees or commissions.
+
+## Core Facts
+
+- **Office Address:** 302A Aaltos A&M Trade Center, Himayat Nagar, Hyderabad, Telangana 500029, India.
+- **Official Telephone:** +91-9666963756
+- **Official Email:** info@evoverseas.com
+- **Visa Success Rate:** 97% consulate success rate for USA F-1 student visas, UK Student Route, Germany Study Visas, and Australia Student Visas (Subclass 500).
+- **Pricing:** ₹0 for initial admissions counselling, profile matching, and university shortlist. Transparency-first pricing with no under-the-table commissions.
+
+## Core Navigation
+
+- [Home](https://evoverseas.com/) - Main page with the Profile Matcher, Cost Calculator, and Scholarship filters.
+- [Study in USA](https://evoverseas.com/study-in-usa.html) - Complete F-1 student visa and university admission guide.
+- [Study in UK](https://evoverseas.com/study-in-uk.html) - CAS letter, unconditional offers, and Student Route visa guide.
+- [Study in Germany](https://evoverseas.com/study-in-germany.html) - Public university free tuition guide, APS certificate, and Blocked Account setup.
+- [Study in Australia](https://evoverseas.com/study-in-australia.html) - GS (Genuine Student) evaluation, CoE issuance, and Subclass 500 visa.
+- [Contact Us](https://evoverseas.com/contact.html) - Forms, maps, and appointment booking for office walk-ins or Google Meet slots.
+- [Dashboard](https://evoverseas.com/dashboard.html) - Live credentials and application status portal for registered students.
+
+## Full Details
+- For comprehensive data, details, deadlines, and cost breakdowns, see the [Full Specification Guide](https://evoverseas.com/llms-full.txt).

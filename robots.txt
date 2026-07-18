@@ -1,19 +1,43 @@
 # robots.txt for evoverseas.com (EV Overseas)
 
+# Allow all standard search crawlers
 User-agent: *
 Allow: /
-
-# Sitemap
-Sitemap: https://evoverseas.com/sitemap.xml
-
-# Block non-public paths
 Disallow: /admin/
 Disallow: /test/
 Disallow: /.git/
 Disallow: /google-apps-script.js
+Disallow: /dashboard.html
 
-# Allow static assets
-Allow: /images/
-Allow: /style.css
-Allow: /app.js
-Allow: /dashboard.html
+# Explicitly allow and prioritize AI Search & LLM scrapers
+User-agent: GPTBot
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+
+User-agent: ClaudeBot
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+
+User-agent: PerplexityBot
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+
+User-agent: Google-Extended
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+
+User-agent: Applebot-Extended
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+
+# Sitemap
+Sitemap: https://evoverseas.com/sitemap.xml
+
+# LLM Scraper Indexes
+# llms.txt: https://evoverseas.com/llms.txt
+# llms-full.txt: https://evoverseas.com/llms-full.txt

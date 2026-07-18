@@ -1494,3 +1494,205 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 });
+
+// ============================================
+// NEW INTERACTIVE STUDENT TOOLS (DOMContentLoaded)
+// ============================================
+document.addEventListener('DOMContentLoaded', function () {
+    // ----------------------------------------
+    // 1. INTAKE TIMELINE TRACKER LOGIC
+    // ----------------------------------------
+    const timelineCountry = document.getElementById('timeline-country');
+    const timelineIntake = document.getElementById('timeline-intake');
+    const timelineResults = document.getElementById('timeline-results');
+
+    const timelineData = {
+        USA: {
+            "Fall 2026": [
+                { title: "Exam Preparation (GRE/IELTS/TOEFL)", date: "Aug - Oct 2025", desc: "Start preparing and take tests. Aim for GRE 310+, IELTS 6.5+.", status: "completed" },
+                { title: "University Shortlisting & SOP Writing", date: "Oct - Dec 2025", desc: "Shortlist 6-8 universities. Write SOP draft, collect LORs.", status: "current" },
+                { title: "Application Submission", date: "Dec 2025 - Feb 2026", desc: "Submit applications. Keep track of deadlines (typically Dec 15 - Feb 15).", status: "pending" },
+                { title: "Admissions & Financial Documentation", date: "Mar - May 2026", desc: "Receive offers, negotiate scholarships, secure loan approval.", status: "pending" },
+                { title: "I-20 Issuance & F-1 Visa Processing", date: "May - Jul 2026", desc: "Receive I-20 form. Pay SEVIS fee, file DS-160, and attend visa interview.", status: "pending" },
+                { title: "Departure & Onboarding", date: "Aug 2026", desc: "Book flights, secure student housing, and attend pre-departure briefing.", status: "pending" }
+            ],
+            "Spring 2027": [
+                { title: "Exam Preparation (GRE/IELTS/TOEFL)", date: "Jan - Apr 2026", desc: "Start preparing and take tests.", status: "completed" },
+                { title: "University Shortlisting & SOP Writing", date: "May - Jun 2026", desc: "Shortlist 6-8 universities. Prepare SOP and LORs.", status: "current" },
+                { title: "Application Submission", date: "Jul - Sep 2026", desc: "Submit applications. Keep track of deadlines (typically Aug 1 - Oct 1).", status: "pending" },
+                { title: "Admissions & Financial Documentation", date: "Oct - Nov 2026", desc: "Receive offers, secure funding/loans, get financial letters.", status: "pending" },
+                { title: "I-20 Issuance & F-1 Visa Processing", date: "Nov - Dec 2026", desc: "Receive I-20, file DS-160, book and attend visa interview.", status: "pending" },
+                { title: "Departure & Onboarding", date: "Jan 2027", desc: "Book flights, secure student housing, fly to campus.", status: "pending" }
+            ]
+        },
+        UK: {
+            "Fall 2026": [
+                { title: "English Language Test (IELTS/PTE)", date: "Sep - Nov 2025", desc: "Take IELTS/PTE. Aim for 6.5 band overall with no band less than 6.0.", status: "completed" },
+                { title: "University Shortlisting & Application Prep", date: "Nov 2025 - Jan 2026", desc: "Select 4-5 UK universities. Gather academic transcripts and reference letters.", status: "current" },
+                { title: "Submit Applications", date: "Jan - Apr 2026", desc: "Submit applications. Seek conditional offers.", status: "pending" },
+                { title: "Admissions & Funding", date: "Apr - Jun 2026", desc: "Pay deposit to secure seat. Receive unconditional offer. Get CAS letter.", status: "pending" },
+                { title: "Visa Processing (Student Visa)", date: "Jun - Aug 2026", desc: "Show bank statements with 28-day funds. Submit visa application.", status: "pending" },
+                { title: "Departure & Onboarding", date: "Sep 2026", desc: "Book flights, secure accommodation, travel to UK.", status: "pending" }
+            ],
+            "Spring 2027": [
+                { title: "English Language Test (IELTS/PTE)", date: "Apr - Jun 2026", desc: "Prepare and take English test.", status: "completed" },
+                { title: "Shortlisting & Applications", date: "Jul - Sep 2026", desc: "Select universities and submit applications.", status: "current" },
+                { title: "Unconditional Offer & Deposit", date: "Oct - Nov 2026", desc: "Pay deposits, receive CAS letters.", status: "pending" },
+                { title: "Student Visa Processing", date: "Nov - Dec 2026", desc: "Apply for UK student visa with required funds statement.", status: "pending" },
+                { title: "Departure & Travel", date: "Jan 2027", desc: "Travel to UK for Spring intake onboarding.", status: "pending" }
+            ]
+        },
+        Germany: {
+            "Fall 2026": [
+                { title: "German Language Prep / IELTS exam", date: "Jun - Oct 2025", desc: "Learn German A1/A2 (if required) or prepare for English courses.", status: "completed" },
+                { title: "Uni-Assist / Direct University Shortlisting", date: "Nov 2025 - Feb 2026", desc: "Get transcripts translated and evaluated by VPD/Uni-Assist.", status: "current" },
+                { title: "Submit Applications", date: "Mar - May 2026", desc: "Submit applications. Most deadlines are July 15, but early application is advised.", status: "pending" },
+                { title: "Block Account Setup & Funding", date: "Jun - Jul 2026", desc: "Receive admission letter. Set up Blocked Account (approx. €11,900).", status: "pending" },
+                { title: "Germany Student Visa Appointment", date: "Jul - Aug 2026", desc: "Book visa slot early. Submit block account proof and attend interview.", status: "pending" },
+                { title: "Departure & Enrollment", date: "Sep - Oct 2026", desc: "Fly to Germany, register address (Anmeldung), enroll at university.", status: "pending" }
+            ],
+            "Spring 2027": [
+                { title: "Language Prep & VPD Evaluation", date: "Jan - Apr 2026", desc: "Prepare language tests, apply for VPD document evaluation.", status: "completed" },
+                { title: "University Shortlisting & Uni-Assist", date: "May - Jul 2026", desc: "Shortlist universities and prepare document translations.", status: "current" },
+                { title: "Submit Applications", date: "Aug - Oct 2026", desc: "German universities application period. Deadline is typically Jan 15.", status: "pending" },
+                { title: "Admission Letter & Blocked Account", date: "Nov - Dec 2026", desc: "Setup blocked account, deposit mandatory living costs.", status: "pending" },
+                { title: "Visa Appointment & Processing", date: "Dec 2026 - Jan 2027", desc: "Attend German visa interview at consulate.", status: "pending" },
+                { title: "Departure to Germany", date: "Feb - Mar 2027", desc: "Fly to Germany, attend pre-semester orientation.", status: "pending" }
+            ]
+        },
+        Australia: {
+            "Fall 2026": [
+                { title: "English Language Test (IELTS/PTE)", date: "Sep - Nov 2025", desc: "Prepare and clear English language test.", status: "completed" },
+                { title: "University Shortlisting & Documentation", date: "Nov 2025 - Jan 2026", desc: "Gather academic documents, SOP, and work experience proofs.", status: "current" },
+                { title: "Submit Applications & GTE check", date: "Feb - Apr 2026", desc: "Submit applications. Pass Genuine Student (GS) evaluation.", status: "pending" },
+                { title: "Offer Acceptance & OSHC", date: "Apr - Jun 2026", desc: "Accept offer, pay tuition deposit, secure Overseas Student Health Cover.", status: "pending" },
+                { title: "CoE Issuance & Visa Lodgement", date: "Jun - Jul 2026", desc: "Receive Confirmation of Enrollment (CoE). Lodge Subclass 500 visa.", status: "pending" },
+                { title: "Departure & Arrival", date: "Jul - Aug 2026", desc: "Fly to Australia for July/August semester start.", status: "pending" }
+            ],
+            "Spring 2027": [
+                { title: "English Language Test (IELTS/PTE)", date: "Mar - May 2026", desc: "Take IELTS/PTE. Shortlist universities.", status: "completed" },
+                { title: "Application Preparation & Submission", date: "Jun - Aug 2026", desc: "Prepare documents and submit applications to target universities.", status: "current" },
+                { title: "GTE Evaluation & Offer Acceptance", date: "Sep - Oct 2026", desc: "Clear genuine student check, pay deposit and get CoE.", status: "pending" },
+                { title: "OSHC & Visa Lodgement", date: "Nov - Dec 2026", desc: "Secure health cover, lodge subclass 500 student visa.", status: "pending" },
+                { title: "Departure to Australia", date: "Jan 2027", desc: "Travel to Australia for February/March intake orientation.", status: "pending" }
+            ]
+        }
+    };
+
+    function updateTimeline() {
+        if (!timelineCountry || !timelineIntake || !timelineResults) return;
+
+        const country = timelineCountry.value;
+        const intake = timelineIntake.value;
+
+        const steps = timelineData[country][intake] || [];
+
+        timelineResults.innerHTML = `
+            <div class="timeline-header-info">
+                <h4>Your Timeline for ${country} (${intake})</h4>
+                <p>Calculated dynamic roadmap based on current date. Get direct help on any stage via WhatsApp.</p>
+            </div>
+            <div class="timeline-flow">
+                ${steps.map((step, idx) => `
+                    <div class="timeline-step-node ${step.status}" style="animation-delay: ${idx * 0.1}s">
+                        <div class="timeline-step-card-content">
+                            <div class="timeline-step-meta">
+                                <span class="timeline-step-title">${step.title}</span>
+                                <span class="timeline-step-date">${step.date}</span>
+                            </div>
+                            <p class="timeline-step-desc">${step.desc}</p>
+                            ${step.status === 'current' ? `
+                                <a href="https://wa.me/919666963756?text=Hi%20EV%20Overseas%2C%20I%20am%20at%20the%20%27${encodeURIComponent(step.title)}%27%20stage%20for%20${country}%20${intake}.%20Can%20you%20help%20me%3F" target="_blank" class="timeline-step-action">
+                                    <i class="fab fa-whatsapp"></i> Get Consultant Help Now
+                                </a>
+                            ` : ''}
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    if (timelineCountry) {
+        timelineCountry.addEventListener('change', updateTimeline);
+        timelineIntake.addEventListener('change', updateTimeline);
+        updateTimeline(); // Run on initial load
+    }
+
+    // ----------------------------------------
+    // 2. VISA CHECKLIST & READINESS LOGIC
+    // ----------------------------------------
+    const checklistItems = document.querySelectorAll('.checklist-checkbox');
+    const readinessRadialBar = document.getElementById('readiness-radial-bar');
+    const readinessText = document.getElementById('readiness-percent-text');
+    const readinessBadge = document.getElementById('readiness-badge');
+
+    function updateVisaReadiness() {
+        if (checklistItems.length === 0) return;
+
+        let checkedCount = 0;
+        checklistItems.forEach(item => {
+            const row = item.closest('.checklist-item-row');
+            if (item.checked) {
+                checkedCount++;
+                if (row) row.classList.add('checked');
+            } else {
+                if (row) row.classList.remove('checked');
+            }
+        });
+
+        const percent = Math.round((checkedCount / checklistItems.length) * 100);
+
+        // Update radial circle gauge
+        if (readinessRadialBar) {
+            // Stroke dasharray is 402 (2 * pi * r = 2 * 3.14159 * 64 = 402)
+            const circumference = 402;
+            const offset = circumference - (percent / 100) * circumference;
+            readinessRadialBar.style.strokeDashoffset = offset;
+        }
+
+        // Update percentage text
+        if (readinessText) {
+            readinessText.textContent = `${percent}%`;
+        }
+
+        // Update status badge
+        if (readinessBadge) {
+            if (percent === 100) {
+                readinessBadge.textContent = "🚀 Ready for Submission!";
+                readinessBadge.style.background = "rgba(16, 185, 129, 0.2)";
+                readinessBadge.style.color = "#10b981";
+            } else if (percent >= 70) {
+                readinessBadge.textContent = "📈 Highly Prepared";
+                readinessBadge.style.background = "rgba(0, 180, 216, 0.2)";
+                readinessBadge.style.color = "#00b4d8";
+            } else if (percent >= 40) {
+                readinessBadge.textContent = "⏳ Progressing Well";
+                readinessBadge.style.background = "rgba(255, 107, 0, 0.2)";
+                readinessBadge.style.color = "#ff6b00";
+            } else {
+                readinessBadge.textContent = "📝 Setup Stage";
+                readinessBadge.style.background = "rgba(100, 116, 139, 0.15)";
+                readinessBadge.style.color = "#64748b";
+            }
+        }
+    }
+
+    // Attach click listeners to checklists
+    checklistItems.forEach(item => {
+        item.addEventListener('change', updateVisaReadiness);
+        const row = item.closest('.checklist-item-row');
+        if (row) {
+            row.addEventListener('click', function (e) {
+                if (e.target !== item) {
+                    item.checked = !item.checked;
+                    updateVisaReadiness();
+                }
+            });
+        }
+    });
+
+    // Run once on load
+    updateVisaReadiness();
+});
+

@@ -5,15 +5,10 @@
  */
 
 // ── CONFIGURATION ──────────────────────────────────────────
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzI6mgA3ELgi4YW-nbbpXEUhxJsBUc6gyj7IZn6rodIClK7AybjkVfTQMyDxfF1B8c-/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwtbmG45Od470Tp9NDrWdDOo-2emqhaARY-MPQJVKK-p6MKpkZZ-FJLxvTx2Sv7bkjR/exec';
 
-// Official Counselor Email Addresses
-const COUNSELOR_EMAILS = [
-    'gopi.chand@evoverseas.com',
-    'lakshmi.bala@evoverseas.com',
-    'alisha.mulani@evoverseas.com',
-    'mohibmulani@gmail.com'
-];
+// Counselor role is managed in Clerk Dashboard → Users → Public Metadata → {"role": "counselor"}
+// No hardcoded email list needed — Clerk handles role assignment
 
 // ── Journey Steps Definition ──────────────────────────────
 const JOURNEY_STEPS = [
@@ -62,37 +57,10 @@ window.addEventListener('load', async function () {
     }
 
     // Handle current auth state + listen for future changes (e.g. after sign-in)
-    handleAuthState(clerk.user);
-    clerk.addListener(({ user }) => handleAuthState(user));
-});
-
-async function handleAuthState(user) {
-    if (user) {
-        const email = user.emailAddresses[0]?.emailAddress || '';
-        const role = user.publicMetadata?.role || 'student';
-
-        currentUser = {
-            id: user.id,
-            email: email,
-            name: user.fullName || user.firstName || email.split('@')[0],
-            picture: user.imageUrl,
-            role: role
-        };
-
-        const isCounselor = role === 'counselor' ||
-            COUNSELOR_EMAILS.map(e => e.toLowerCase()).includes(email.toLowerCase()) ||
-            email.toLowerCase().includes('counselor') ||
-            email.toLowerCase().includes('admin');
-
-        if (isCounselor) {
-            userRole = 'counselor';
-            await loadCounselorDashboard();
-        } else {
-            userRole = 'student';
-            await loadStudentDashboard();
-        }
+    if (clerk.user) {
+        await handleAuthState(clerk.user);
     } else {
-        // No user — show sign-in (use redirectToSignIn as fallback if mountSignIn fails)
+        // No user yet — show sign-in, then listen for changes
         showLoginScreen();
         try {
             mountClerkAuth();
@@ -100,6 +68,42 @@ async function handleAuthState(user) {
             console.warn('mountSignIn unavailable, redirecting:', e);
             clerk.redirectToSignIn();
         }
+    }
+
+    // Listen for future auth changes (e.g. after sign-in completes)
+    clerk.addListener(async ({ user }) => {
+        if (user && !currentUser) {
+            await handleAuthState(user);
+        }
+    });
+});
+
+async function handleAuthState(user) {
+    if (!user) return;
+
+    const email = user.emailAddresses?.[0]?.emailAddress || user.primaryEmailAddress?.emailAddress || '';
+
+    if (!email) {
+        showError('No email address found on your account. Please add an email in your Clerk profile.');
+        return;
+    }
+
+    const role = user.publicMetadata?.role || 'student';
+
+    currentUser = {
+        id: user.id,
+        email: email,
+        name: user.fullName || user.firstName || email.split('@')[0],
+        picture: user.imageUrl,
+        role: role
+    };
+
+    if (role === 'counselor') {
+        userRole = 'counselor';
+        await loadCounselorDashboard();
+    } else {
+        userRole = 'student';
+        await loadStudentDashboard();
     }
 }
 

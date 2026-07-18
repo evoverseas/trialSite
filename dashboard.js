@@ -6,7 +6,12 @@
 
 // ── CONFIGURATION ──────────────────────────────────────────
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzI6mgA3ELgi4YW-nbbpXEUhxJsBUc6gyj7IZn6rodIClK7AybjkVfTQMyDxfF1B8c-/exec';
-const CLERK_PUBLISHABLE_KEY = 'pk_live_Y2xlcmsuZXZvdmVyc2Vhcy5jb20k';
+
+// Smart Key Switching: Production (evoverseas.com) vs Trial / GitHub Pages
+const IS_CUSTOM_DOMAIN = window.location.hostname.includes('evoverseas.com');
+const CLERK_PUBLISHABLE_KEY = IS_CUSTOM_DOMAIN
+    ? 'pk_live_Y2xlcmsuZXZvdmVyc2Vhcy5jb20k'
+    : 'pk_test_c3VwZXJiLWNyYW5lLTQ1LmNsZXJrLmFjY291bnRzLmRldiQ';
 
 // Official Counselor Email Addresses
 const COUNSELOR_EMAILS = [

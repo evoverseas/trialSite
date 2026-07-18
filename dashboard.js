@@ -55,10 +55,11 @@ window.addEventListener('load', async function () {
 
     if (window.Clerk) {
         try {
-            const IS_CUSTOM_DOMAIN = window.location.hostname.includes('evoverseas.com');
-            const key = IS_CUSTOM_DOMAIN
-                ? 'pk_live_Y2xlcmsuZXZvdmVyc2Vhcy5jb20k'
-                : 'pk_test_c3VwZXJiLWNyYW5lLTQ1LmNsZXJrLmFjY291bnRzLmRldiQ';
+            // Use Production Key for live public domains (github.io / evoverseas.com)
+            const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            const key = isLocalhost
+                ? 'pk_test_c3VwZXJiLWNyYW5lLTQ1LmNsZXJrLmFjY291bnRzLmRldiQ'
+                : 'pk_live_Y2xlcmsuZXZvdmVyc2Vhcy5jb20k';
 
             if (typeof window.Clerk === 'function') {
                 clerk = new window.Clerk(key);

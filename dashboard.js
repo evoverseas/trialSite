@@ -50,11 +50,7 @@ window.addEventListener('load', async function () {
     if (window.Clerk) {
         try {
             clerk = window.Clerk;
-
-            // Call load() on the Clerk global instance if not already ready
-            if (typeof clerk.load === 'function' && !clerk.isReady) {
-                await clerk.load();
-            }
+            await clerk.load();
 
             if (clerk.user) {
                 const email = clerk.user.emailAddresses[0]?.emailAddress || '';

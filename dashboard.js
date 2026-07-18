@@ -47,48 +47,61 @@ window.addEventListener('load', async function () {
         attempts++;
     }
 
-    if (window.Clerk) {
-        try {
-            clerk = window.Clerk;
-            await clerk.load();
+    if (!window.Clerk) {
+        showError('Clerk authentication SDK failed to load. Please check your internet connection.');
+        return;
+    }
 
-            if (clerk.user) {
-                const email = clerk.user.emailAddresses[0]?.emailAddress || '';
-                const role = clerk.user.publicMetadata?.role || 'student';
+    try {
+        clerk = window.Clerk;
+        await clerk.load();
+    } catch (err) {
+        console.error('Clerk load error:', err);
+        showError('Clerk error: ' + (err.message || String(err)));
+        return;
+    }
 
-                currentUser = {
-                    id: clerk.user.id,
-                    email: email,
-                    name: clerk.user.fullName || clerk.user.firstName || email.split('@')[0],
-                    picture: clerk.user.imageUrl,
-                    role: role
-                };
+    // Handle current auth state + listen for future changes (e.g. after sign-in)
+    handleAuthState(clerk.user);
+    clerk.addListener(({ user }) => handleAuthState(user));
+});
 
-                // Detect Counselor: check role or official counselor emails list
-                const isCounselor = role === 'counselor' ||
-                    COUNSELOR_EMAILS.map(e => e.toLowerCase()).includes(email.toLowerCase()) ||
-                    email.toLowerCase().includes('counselor') ||
-                    email.toLowerCase().includes('admin');
+async function handleAuthState(user) {
+    if (user) {
+        const email = user.emailAddresses[0]?.emailAddress || '';
+        const role = user.publicMetadata?.role || 'student';
 
-                if (isCounselor) {
-                    userRole = 'counselor';
-                    await loadCounselorDashboard();
-                } else {
-                    userRole = 'student';
-                    await loadStudentDashboard();
-                }
-            } else {
-                showLoginScreen();
-                mountClerkAuth();
-            }
-        } catch (err) {
-            console.error('Error initializing Clerk:', err);
-            showError('Clerk error: ' + (err.message || err.toString || String(err)));
+        currentUser = {
+            id: user.id,
+            email: email,
+            name: user.fullName || user.firstName || email.split('@')[0],
+            picture: user.imageUrl,
+            role: role
+        };
+
+        const isCounselor = role === 'counselor' ||
+            COUNSELOR_EMAILS.map(e => e.toLowerCase()).includes(email.toLowerCase()) ||
+            email.toLowerCase().includes('counselor') ||
+            email.toLowerCase().includes('admin');
+
+        if (isCounselor) {
+            userRole = 'counselor';
+            await loadCounselorDashboard();
+        } else {
+            userRole = 'student';
+            await loadStudentDashboard();
         }
     } else {
-        showError('Clerk authentication SDK failed to load. Please check your internet connection.');
+        // No user — show sign-in (use redirectToSignIn as fallback if mountSignIn fails)
+        showLoginScreen();
+        try {
+            mountClerkAuth();
+        } catch (e) {
+            console.warn('mountSignIn unavailable, redirecting:', e);
+            clerk.redirectToSignIn();
+        }
     }
-});
+}
 
 // ── MOUNT CLERK AUTH UI ────────────────────────────────────
 function mountClerkAuth() {

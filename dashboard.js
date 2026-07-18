@@ -6,7 +6,7 @@
 
 // ── CONFIGURATION ──────────────────────────────────────────
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzI6mgA3ELgi4YW-nbbpXEUhxJsBUc6gyj7IZn6rodIClK7AybjkVfTQMyDxfF1B8c-/exec';
-const CLERK_PUBLISHABLE_KEY = 'pk_test_c3VwZXJiLWNyYW5lLTQ1LmNsZXJrLmFjY291bnRzLmRldiQ';
+const CLERK_PUBLISHABLE_KEY = 'pk_live_Y2xlcmsuZXZvdmVyc2Vhcy5jb20k';
 
 // Official Counselor Email Addresses
 const COUNSELOR_EMAILS = [
@@ -42,8 +42,12 @@ window.addEventListener('load', async function () {
     showLoadingScreen();
 
     if (window.Clerk) {
-        clerk = window.Clerk;
         try {
+            if (typeof window.Clerk === 'function') {
+                clerk = new window.Clerk(CLERK_PUBLISHABLE_KEY);
+            } else {
+                clerk = window.Clerk;
+            }
             await clerk.load();
 
             if (clerk.user) {

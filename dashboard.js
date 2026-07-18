@@ -7,12 +7,6 @@
 // ── CONFIGURATION ──────────────────────────────────────────
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzI6mgA3ELgi4YW-nbbpXEUhxJsBUc6gyj7IZn6rodIClK7AybjkVfTQMyDxfF1B8c-/exec';
 
-// Smart Key Switching: Production (evoverseas.com) vs Trial / GitHub Pages
-const IS_CUSTOM_DOMAIN = window.location.hostname.includes('evoverseas.com');
-const CLERK_PUBLISHABLE_KEY = IS_CUSTOM_DOMAIN
-    ? 'pk_live_Y2xlcmsuZXZvdmVyc2Vhcy5jb20k'
-    : 'pk_test_c3VwZXJiLWNyYW5lLTQ1LmNsZXJrLmFjY291bnRzLmRldiQ';
-
 // Official Counselor Email Addresses
 const COUNSELOR_EMAILS = [
     'gopi.chand@evoverseas.com',
@@ -55,20 +49,11 @@ window.addEventListener('load', async function () {
 
     if (window.Clerk) {
         try {
-            // Use Production Key for live public domains (github.io / evoverseas.com)
-            const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-            const key = isLocalhost
-                ? 'pk_test_c3VwZXJiLWNyYW5lLTQ1LmNsZXJrLmFjY291bnRzLmRldiQ'
-                : 'pk_live_Y2xlcmsuZXZvdmVyc2Vhcy5jb20k';
+            clerk = window.Clerk;
 
-            if (typeof window.Clerk === 'function') {
-                clerk = new window.Clerk(key);
+            // Call load() on the Clerk global instance if not already ready
+            if (typeof clerk.load === 'function' && !clerk.isReady) {
                 await clerk.load();
-            } else {
-                clerk = window.Clerk;
-                if (typeof clerk.load === 'function' && !clerk.isReady) {
-                    await clerk.load({ publishableKey: key });
-                }
             }
 
             if (clerk.user) {
